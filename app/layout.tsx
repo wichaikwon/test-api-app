@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Chakra_Petch } from 'next/font/google'
 import './globals.css'
-import { NavbarContextProvider } from '@/contexts/useNavbar'
+import NavbarWrapper from "@/app/components/NavbarWrapper"
+
 
 const chakraPetch = Chakra_Petch({
   subsets: ['thai'],
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${chakraPetch.className} antialiased`}>
-        <NavbarContextProvider>{children}</NavbarContextProvider>
+        <NavbarWrapper>{children}</NavbarWrapper>
       </body>
     </html>
   )
