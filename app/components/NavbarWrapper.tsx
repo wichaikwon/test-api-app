@@ -11,15 +11,15 @@ const NavbarWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   if (pathname.startsWith('/admin/dashboard')) {
     return (
-        <div className="flex h-screen">
-          <Sidebar />
-          <div className="flex flex-1 flex-col">
-            <NavbarAdminContextProvider>
-              <div className="min-h-0 flex-1 overflow-auto to-white">{children}</div>
-            </NavbarAdminContextProvider>
-            <nav className="bg-green-500">footer</nav>
-          </div>
+      <div className="flex h-screen">
+        <Sidebar />
+        <div className="flex flex-1 flex-col">
+          <NavbarAdminContextProvider>
+            <div className="min-h-0 flex-1 overflow-auto to-white">{children}</div>
+          </NavbarAdminContextProvider>
+          <nav className="bg-green-500">footer</nav>
         </div>
+      </div>
     )
   }
 
@@ -27,7 +27,16 @@ const NavbarWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     return <>{children}</>
   }
 
-  return <NavbarContextProvider>{children}</NavbarContextProvider>
+  return (
+    <div className="flex h-screen">
+      <div className="flex flex-1 flex-col">
+        <NavbarContextProvider>
+          <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+        </NavbarContextProvider>
+        <nav>footer</nav>
+      </div>
+    </div>
+  )
 }
 
 export default NavbarWrapper

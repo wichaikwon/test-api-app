@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { Chakra_Petch } from 'next/font/google'
 import './globals.css'
-import Sidebar from './components/Sidebar'
-import { NavbarAdminContextProvider } from '@/contexts/useNavbarAdmin'
 import NavbarWrapper from './components/NavbarWrapper'
 
 const chakraPetch = Chakra_Petch({

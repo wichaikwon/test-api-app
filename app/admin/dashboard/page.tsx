@@ -2,7 +2,7 @@
 import DropdownSearch from '@/app/components/DropdownSearch'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { fetchBrands, fetchCapacities, fetchModels, fetchPhones } from '@/lib/data'
+import { fetchBrands, fetchModels } from '@/lib/data'
 import { pathAPI } from '@/lib/api'
 import { useDebounce } from '@uidotdev/usehooks'
 
@@ -15,17 +15,6 @@ interface Model {
   brand_id: number
   model_name: string
 }
-interface Phone {
-  id: number
-  brand_id: number
-  model_id: number
-  capacity_id: number
-  price: number
-}
-interface Capacity {
-  id: number
-  capacity_value: string
-}
 
 const Dashboard: React.FC = () => {
   const searchParams = useSearchParams()
@@ -33,8 +22,6 @@ const Dashboard: React.FC = () => {
   const pathname = usePathname()
   const [brand, setBrand] = useState<Brand[]>([])
   const [model, setModel] = useState<Model[]>([])
-  const [_, setPhone] = useState<Phone[]>([])
-  const [, setCapacity] = useState<Capacity[]>([])
   const [data, setData] = useState<any[]>([])
 
   const [selectedBrandName, setSelectedBrandName] = useState(searchParams.get('brand_name') || '')
@@ -44,6 +31,9 @@ const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedBrandName = useDebounce(selectedBrandName, 300)
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   const fetchData = useCallback(async () => {
     const params = new URLSearchParams(searchParams)
@@ -59,18 +49,17 @@ const Dashboard: React.FC = () => {
       if (!res.ok) throw new Error('Failed to fetch data')
 
       const result = await res.json()
-      setData(Array.isArray(result.phones) ? result.phones : []) 
+      setData(Array.isArray(result.phones) ? result.phones : [])
     } catch (err) {
       setError((err as Error).message)
     } finally {
       setLoading(false)
     }
   }, [selectedBrandName, selectedModelName, pathname, debouncedBrandName])
+
   useEffect(() => {
     fetchBrands().then(setBrand)
     fetchModels().then(setModel)
-    fetchPhones().then(setPhone)
-    fetchCapacities().then(setCapacity)
     fetchData()
   }, [fetchData])
 
@@ -99,6 +88,18 @@ const Dashboard: React.FC = () => {
     )
   }, [data, searchQuery])
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredData.slice(startIndex, endIndex)
+  }, [filteredData, currentPage])
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
   return (
     <div className="flex h-full flex-col items-center gap-4 p-4">
       <div className="flex w-full items-center justify-center gap-4">
@@ -126,7 +127,7 @@ const Dashboard: React.FC = () => {
           clear
         </button>
       </div>
-      {selectedBrandName && (
+      {selectedBrandName ? (
         <>
           <div className="flex w-full items-center px-20">
             <input
@@ -139,20 +140,20 @@ const Dashboard: React.FC = () => {
           <div className="w-full rounded border border-gray-200">
             {Array.isArray(data) && data.length > 0 ? (
               <>
-                <div className="grid grid-cols-6 items-center gap-4 border-b bg-gray-200 p-2">
-                  {['#', 'Brands', 'Models', 'Storage', 'Price', 'Action'].map((header, idx) => (
+                <div className="grid grid-cols-5 items-center gap-4 border-b bg-gray-200 p-2">
+                  {['Brands', 'Models', 'Storage', 'Price', 'Action'].map((header, idx) => (
                     <div key={idx} className="flex w-full justify-between border-r border-white p-2">
                       <p className="flex w-full items-center justify-center">{header}</p>
-                      <button>filter</button>
+                      <button>sort</button>
                     </div>
                   ))}
                 </div>
-                {filteredData.length > 0 ? (
-                  filteredData.map((d: any, idx: number) => (
-                    <div key={idx} className="grid grid-cols-6 items-center gap-4 border-b p-2">
-                      {['#', 'brand_name', 'model_name', 'capacity_value', 'price'].map((key, i) => (
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((d: any, idx: number) => (
+                    <div key={idx} className="grid grid-cols-5 items-center gap-4 border-b p-2">
+                      {['brand_name', 'model_name', 'capacity_value', 'price'].map((key, i) => (
                         <p key={i} className="flex justify-center border-r">
-                          {key === '#' ? idx + 1 : d[key]}
+                          {d[key]}
                         </p>
                       ))}
                       <div className="flex justify-around">
@@ -170,10 +171,52 @@ const Dashboard: React.FC = () => {
                 ) : (
                   <p>{loading}</p>
                 )}
+                <div className="flex justify-center gap-4 p-4">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-gray-300 rounded-md">
+                    Previous
+                  </button>
+                  <p className="flex items-center justify-center">
+                    Page {currentPage} of {totalPages}
+                  </p>
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-gray-300 rounded-md">
+                    Next
+                  </button>
+                </div>
               </>
             ) : (
               <p>{error}</p>
             )}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex w-full items-center px-20">
+            <input
+              className="w-full rounded-md border p-2"
+              placeholder="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              disabled
+            />
+          </div>
+          <div className="w-full rounded border border-gray-200">
+            <div className="grid grid-cols-6 items-center gap-4 border-b bg-gray-200 p-2">
+              {['Brands', 'Models', 'Storage', 'Price', 'Action'].map((header, idx) => (
+                <div key={idx} className="flex w-full justify-between border-r border-white p-2">
+                  <p className="flex w-full items-center justify-center">{header}</p>
+                  <button>sort</button>
+                </div>
+              ))}
+            </div>
+            <p className='flex justify-center text-xl'>
+              no data please select Brand
+            </p>
           </div>
         </>
       )}

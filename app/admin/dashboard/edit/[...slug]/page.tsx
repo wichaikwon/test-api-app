@@ -76,7 +76,7 @@ const EditPage: React.FC = () => {
         <div key={idx} className="flex flex-col gap-4">
           {['ยี่ห้อ', 'รุ่น', 'ความจุ', 'ราคา','ราคาต่ำสุด'].map((label, i) => (
             <div key={i} className="flex items-center gap-4">
-              <p className="w-16">{label} : </p>
+              <p className="w-28">{label} : </p>
               <input
                 className="w-full rounded-md border p-2"
                 placeholder={
@@ -116,7 +116,7 @@ const EditPage: React.FC = () => {
         <div key={idx} className="flex items-center gap-4">
           <div className="w-full rounded-md border bg-slate-200 p-4">
             <p className="border-black pb-2 text-3xl">{item.defect_category}</p>
-            <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-5">
               {defectChoice.map(
                 (choice, idx) =>
                   choice.defect_id === item.defect_id && (

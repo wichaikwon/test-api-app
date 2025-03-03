@@ -1,7 +1,5 @@
 import { pathAPI } from '@/lib/api';
 
-
-
 export const fetchData = async (selectedBrandId: number, selectedModelId: number, selectedPhoneId: number, capacity: any[], setData: (data: any) => void) => {
   if (!selectedBrandId) {
     alert('Please select brand');
