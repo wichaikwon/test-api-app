@@ -14,13 +14,12 @@ export const NavbarAdminContextProvider: FC<NavbarAdminProviderProps> = ({ child
   const router = useRouter()
   return (
     <NavbarAdminContext.Provider value={{}}>
-      <div className="flex flex-col w-full ">
-        <nav className='flex p-4 justify-between bg-slate-100 '>
-          <button onClick={() => router.push('/admin/')}>Dashboard</button>
-          <button onClick={() => router.push('/admin/dashboard')}>User</button>
-        </nav>
-        {children}
-      </div>
+      <nav className="w-full bg-red-500">
+        navbar
+        <button onClick={() => router.push('/admin/')}>Dashboard</button>
+        <button onClick={() => router.push('/admin/dashboard')}>User</button>
+      </nav>
+      {children}
     </NavbarAdminContext.Provider>
   )
 }

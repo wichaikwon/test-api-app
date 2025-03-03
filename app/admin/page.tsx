@@ -5,7 +5,7 @@ import React from 'react'
 const Admin: React.FC = () => {
   const router = useRouter()
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-slate-100">
+    <div className="flex h-full flex-col items-center justify-center bg-slate-100">
       <div className="flex w-9/12 flex-col justify-start gap-2 rounded-lg bg-white p-4 shadow-lg md:w-3/12">
         <p className="flex justify-center">Admin Page</p>
         <p>name</p>

@@ -1,4 +1,4 @@
-import { pathAPI } from '@/lib/data/api';
+import { pathAPI } from '@/lib/api';
 
 
 
