@@ -4,7 +4,7 @@ const InfoSection: React.FC = () => {
   return (
     <Fragment>
       {info.map((item, idx) => (
-        <div key={idx} className="flex flex-col gap-4 p-4 items-center justify-center">
+        <div key={idx} className="flex flex-col gap-4  items-center my-10 lg:my-20 justify-center">
           <p className="w-80 text-center text-2xl md:w-full">{item.name}</p>
           <div className="grid w-9/12 grid-cols-1 md:grid-cols-3">
             {item.details.map((detail, i) => (

@@ -88,7 +88,6 @@ const Dashboard: React.FC = () => {
     )
   }, [data, searchQuery])
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
