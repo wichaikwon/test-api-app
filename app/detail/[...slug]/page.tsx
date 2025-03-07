@@ -3,6 +3,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { fetchViewPhones } from '@/lib/data'
 import classNames from 'classnames'
+import DefectCategory from '@/app/components/DefectCategory'
 
 const Detail: React.FC = () => {
   const pathname = usePathname()
@@ -18,21 +19,11 @@ const Detail: React.FC = () => {
   const [data, setdata] = useState<any[]>([])
 
   useEffect(() => {
+    setOpenModal([{ id: 0, state: true }])
     fetchViewPhones(phone_id).then((data) => setdata(data))
   }, [phone_id])
 
-  const deduction = [200, 1000, 7300, 100, 4000, 800, 7, 70, 900]
-  const maxPrice = 10000
-  const minPrice = 100
-  const calPrice = (maxPrice: number, deduction: number[]) => {
-    let price = maxPrice
-    let i = 0
-    while (price > minPrice && i < deduction.length) {
-      price -= deduction[i]
-      i++
-    }
-    return price > minPrice ? price : minPrice
-  }
+  
   const defectsCategory = Array.from(new Map(data.map((item) => [item.defect_id, item])).values())
   const defectChoice = data.reduce(
     (acc: { defect_id: string; choice_id: string; defect_choice: string; deduction: number }[], item) => {
@@ -69,71 +60,35 @@ const Detail: React.FC = () => {
     })
   }
   const multiToggleSelected = (id: number, name: string) => {
-    setMultiSelected((prev) =>
-      id === 10
-        ? [{ id, name }]
+    setMultiSelected((prev) => 
+      id === 35
+      ? [{ id, name }]
+      : prev.some((item) => item.id === 35)
+        ? [...prev.filter((item) => item.id !== 35), { id, name }]
         : prev.some((item) => item.id === id)
-          ? prev.filter((item) => item.id !== id)
-          : [...prev, { id, name }]
+        ? prev.filter((item) => item.id !== id)
+        : [...prev, { id, name }]
     )
   }
-
+  console.log('selected', selected, 'multiSelected', multiSelected)
   return (
     <div className="flex w-full flex-col gap-2 rounded-lg bg-slate-200 p-2">
       {defectsCategory.map((item, index) => {
         const isOpen = openModal.find((modal) => modal.id === index)?.state
         return (
-          <Fragment key={index}>
-            <div
-              className="flex w-full cursor-pointer items-center justify-between"
-              onClick={() => handleToggleModal(index)}>
-              <p>{item.defect_category} </p>
-              <p className="text-xs text-yellow-500">
-                {index === defectsCategory.length - 1
-                  ? multiSelected.some((item) => item.id === 10)
-                    ? 'ไม่มีปัญหา'
-                    : multiSelected.length === 0
-                      ? ''
-                      : ` มี ${multiSelected.map((item) => item.name).length} ข้อ`
-                  : selected
-                      .filter((item) => item.modal_id === index)
-                      .map((item) => item.name)
-                      .join(', ')}
-              </p>
-            </div>
-            {isOpen && (
-              <div className="grid max-h-96 w-full grid-cols-1 gap-2 pt-2 opacity-100 md:grid-cols-3">
-                {defectChoice
-                  .filter((defect) => defect.defect_id === item.defect_id)
-                  .map((defect, idx) => (
-                    <div key={idx} className="flex w-full gap-4">
-                      {index === defectsCategory.length - 1 ? (
-                        <button
-                          className={classNames(
-                            'flex w-full rounded-md border bg-white p-1 hover:border-yellow-500 hover:bg-yellow-50 md:justify-center',
-                            selected.some((item) => item.id === Number(defect.choice_id))
-                              ? 'border-yellow-500 bg-yellow-50'
-                              : ''
-                          )}
-                          onClick={() => {
-                            multiToggleSelected(idx, defect.defect_choice)
-                          }}>
-                          {defect.defect_choice}
-                        </button>
-                      ) : (
-                        <button
-                          className="flex w-full rounded-md border bg-white p-1 hover:border-yellow-500 hover:bg-yellow-50 md:justify-center"
-                          onClick={() => {
-                            handleToggleSelected(index, idx, defect.defect_choice)
-                          }}>
-                          {defect.defect_choice}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            )}
-          </Fragment>
+          <DefectCategory
+            key={index}
+            item={item}
+            index={index}
+            isOpen={isOpen ?? false}
+            handleToggleModal={handleToggleModal}
+            handleToggleSelected={handleToggleSelected}
+            multiToggleSelected={multiToggleSelected}
+            defectChoice={defectChoice}
+            defectsCategory={defectsCategory}
+            selected={selected}
+            multiSelected={multiSelected}
+          />
         )
       })}
     </div>

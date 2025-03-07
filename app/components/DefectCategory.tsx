@@ -32,13 +32,13 @@ const DefectCategory: React.FC<DefectCategoryProps> = ({
         <p>{item.defect_category} </p>
         <p className="text-xs text-yellow-500">
           {index === defectsCategory.length - 1
-            ? multiSelected.some((item) => item.id === 10)
+            ? multiSelected.some((item) => item.id === 35)
               ? 'ไม่มีปัญหา'
               : multiSelected.length === 0
                 ? ''
                 : ` มี ${multiSelected.map((item) => item.name).length} ข้อ`
             : selected
-                .filter((item) => item.modal_id === index)
+                .filter((item) => item.modal_id === defectsCategory[index].defect_id)
                 .map((item) => item.name)
                 .join(', ')}
         </p>
@@ -50,27 +50,32 @@ const DefectCategory: React.FC<DefectCategoryProps> = ({
             .map((defect, idx) => (
               <div key={idx} className="flex w-full gap-4">
                 {index === defectsCategory.length - 1 ? (
-                    <button
+                  <button
                     className={classNames(
                       'flex w-full rounded-md border bg-white p-1 hover:border-yellow-500 hover:bg-yellow-50 md:justify-center',
-                      multiSelected.some((item) => item.id === idx)
+                      multiSelected.some((item) => item.id === Number(defect.choice_id))
                         ? 'border-yellow-500 bg-yellow-50'
                         : ''
                     )}
-                    onClick={() => multiToggleSelected(idx, defect.defect_choice)}
-                  >
+                    onClick={() => {
+                      multiToggleSelected(Number(defect.choice_id), defect.defect_choice)
+                    }}>
                     {defect.defect_choice}
                   </button>
                 ) : (
                   <button
                     className={classNames(
                       'flex w-full rounded-md border bg-white p-1 hover:border-yellow-500 hover:bg-yellow-50 md:justify-center',
-                      selected.some((item) => item.modal_id === index && item.id === idx)
+                      selected.some(
+                        (item) => item.modal_id === Number(defect.defect_id) && item.id === Number(defect.choice_id)
+                      )
                         ? 'border-yellow-500 bg-yellow-50'
                         : ''
                     )}
                     onClick={() => {
-                      handleToggleSelected(index, idx, defect.defect_choice)
+                      handleToggleSelected(Number(defect.defect_id), Number(defect.choice_id), defect.defect_choice)
+                      handleToggleModal(index)
+                      handleToggleModal(index + 1)
                     }}>
                     {defect.defect_choice}
                   </button>
