@@ -70,7 +70,6 @@ const Detail: React.FC = () => {
         : [...prev, { id, name }]
     )
   }
-  console.log('selected', selected, 'multiSelected', multiSelected)
   return (
     <div className="flex w-full flex-col gap-2 rounded-lg bg-slate-200 p-2">
       {defectsCategory.map((item, index) => {
