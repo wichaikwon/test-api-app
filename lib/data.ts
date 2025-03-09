@@ -49,7 +49,6 @@ export const fetchPhones = async () => {
     }
     const data = await response.json()
     return data
-
   } catch (error) {
     console.error('Failed to fetch phones:', error)
     return []
@@ -63,7 +62,19 @@ export const fetchViewPhones = async (phone_id: string) => {
     }
     const data = await response.json()
     return data
-
+  } catch (error) {
+    console.error('Failed to fetch phones:', error)
+    return []
+  }
+}
+export const fetchFinalPrice = async (phone_id: string, defect_ids: string[]) => {
+  try {
+    const response = await fetch(`${pathAPI}/finalprice?phone_id=${phone_id}&choice_id=${defect_ids.join(',')}`)
+    if (!response.ok) {
+      throw new Error('Network response was not ok')
+    }
+    const data = await response.json()
+    return data
   } catch (error) {
     console.error('Failed to fetch phones:', error)
     return []
