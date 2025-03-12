@@ -1,14 +1,19 @@
 'use client'
-import React, { Fragment, useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import React, { Fragment, use, useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { fetchFinalPrice, fetchViewPhones } from '@/lib/data'
 import DefectCategory from '@/app/components/DefectCategory'
 import { useForm } from 'react-hook-form'
 
+type FormValue = {
+  selectedIds: number[]
+}
 const Detail: React.FC = () => {
   const pathname = usePathname()
   const parts = pathname.split(`/`).filter(Boolean)
   const editIndex = parts.indexOf('detail')
+  const router = useRouter()
+  const [finalPrice, setFinalPrice] = useState<{ final_price: number } | null>(null)
   const [openModal, setOpenModal] = useState<{ id: number; state: boolean }[]>([])
   const [selected, setSelected] = useState<{ modal_id: number; id: number; name: string }[]>([])
   const [multiSelected, setMultiSelected] = useState<{ id: number; name: string }[]>([])
@@ -16,20 +21,13 @@ const Detail: React.FC = () => {
     return <p className="text-red-500">Invalid URL</p>
   }
   const phone_id = parts[editIndex + 1]
-  const [data, setData] = useState<{ defect_id: string; choice_id: string; defect_choice: string; deduction: number }[]>([])
-  const { register, handleSubmit, setValue } = useForm({
-    defaultValues: { selectedIds: [] as number[] },
-  })
+  const [data, setdata] = useState<any[]>([])
+  const { register, handleSubmit, setValue } = useForm<FormValue>()
+
   useEffect(() => {
     setOpenModal([{ id: 0, state: true }])
-    fetchViewPhones(phone_id).then((data) => setData(data))
+    fetchViewPhones(phone_id).then((data) => setdata(data))
   }, [phone_id])
-  useEffect(() => {
-    setValue(
-      'selectedIds',
-      [...selected.map((s) => s.id), ...multiSelected.map((m) => m.id)]
-    )
-  }, [selected, setValue])
 
   const defectsCategory = Array.from(new Map(data.map((item) => [item.defect_id, item])).values())
   const defectChoice = data.reduce(
@@ -80,46 +78,50 @@ const Detail: React.FC = () => {
             : prev.some((item) => item.id === id)
               ? prev.filter((item) => item.id !== id)
               : [...prev, { id, name }]
-
-      setValue('selectedIds', [...selected.map((s) => s.id), ...updated.map((m) => m.id)])
+      setValue('selectedIds', [...selected.map((m) => m.id), ...updated.map((s) => s.id)])
       return updated
     })
   }
-  const onSubmit = (data: { selectedIds: number[] }) => {
-    fetchFinalPrice(phone_id, data.selectedIds.map(String)).then((data) => console.log(data))
-  } 
+
+  const onSubmit = handleSubmit((data) => {
+    fetchFinalPrice(phone_id, data.selectedIds.map(String)).then((data) => setFinalPrice(data))
+    setTimeout(() => {
+      if (finalPrice) {
+        router.push(
+          `/trading_channel/${phone_id}/${selected.map((item) => item.id).join('/')}/${multiSelected.map((item) => item.id).join('/')}/${finalPrice.final_price}`
+        )
+      }
+    }, 300)
+  })
   return (
     <Fragment>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex w-full flex-col gap-2 rounded-lg bg-slate-200 p-2">
-          {defectsCategory.map((item, index) => {
-            const isOpen = openModal.find((modal) => modal.id === index)?.state
-            return (
-              <DefectCategory
-                key={index}
-                item={item}
-                index={index}
-                isOpen={isOpen ?? false}
-                handleToggleModal={handleToggleModal}
-                handleToggleSelected={handleToggleSelected}
-                multiToggleSelected={multiToggleSelected}
-                defectChoice={defectChoice}
-                defectsCategory={defectsCategory}
-                selected={selected}
-                multiSelected={multiSelected}
-              />
-            )
-          })}
-        </div>
-
-        <input type="hidden" {...register('selectedIds')} />
-
-        <button
-          type="submit"
-          className="mt-2 flex w-full justify-center rounded-md bg-yellow-400 p-2 hover:bg-yellow-300">
-          ประเมินราคา
-        </button>
-      </form>
+      <div className="flex w-full flex-col gap-2 rounded-lg bg-slate-200 p-2">
+        {defectsCategory.map((item, index) => {
+          const isOpen = openModal.find((modal) => modal.id === index)?.state
+          return (
+            <DefectCategory
+              key={index}
+              item={item}
+              index={index}
+              isOpen={isOpen ?? false}
+              handleToggleModal={handleToggleModal}
+              handleToggleSelected={handleToggleSelected}
+              multiToggleSelected={multiToggleSelected}
+              defectChoice={defectChoice}
+              defectsCategory={defectsCategory}
+              selected={selected}
+              multiSelected={multiSelected}
+            />
+          )
+        })}
+      </div>
+      <button
+        onClick={() => {
+          onSubmit()
+        }}
+        className="mt-2 flex w-full justify-center rounded-md bg-yellow-400 p-2 hover:bg-yellow-300">
+        ประเมินราคา
+      </button>
     </Fragment>
   )
 }
